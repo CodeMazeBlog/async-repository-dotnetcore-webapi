@@ -4,6 +4,7 @@ using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AccountOwnerServer.Controllers
 {
@@ -20,29 +21,27 @@ namespace AccountOwnerServer.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllOwners()
+        public async Task<IActionResult> GetAllOwners()
         {
             try
             {
-                var owners = _repository.Owner.GetAllOwners();
-
-                _logger.LogInfo($"Returned all owners from database.");
+                var owners = await _repository.Owner.GetAllOwnersAsync();
 
                 return Ok(owners);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Something went wrong inside GetAllOwners action: {ex.Message}");
+                _logger.LogError($"Some error in the GetAllOwners method: {ex}");
                 return StatusCode(500, "Internal server error");
             }
         }
 
         [HttpGet("{id}", Name = "OwnerById")]
-        public IActionResult GetOwnerById(Guid id)
+        public async Task<IActionResult> GetOwnerById(Guid id)
         {
             try
             {
-                var owner = _repository.Owner.GetOwnerById(id);
+                var owner = await _repository.Owner.GetOwnerByIdAsync(id);
 
                 if (owner.IsEmptyObject())
                 {
@@ -63,11 +62,11 @@ namespace AccountOwnerServer.Controllers
         }
 
         [HttpGet("{id}/account")]
-        public IActionResult GetOwnerWithDetails(Guid id)
+        public async Task<IActionResult> GetOwnerWithDetails(Guid id)
         {
             try
             {
-                var owner = _repository.Owner.GetOwnerWithDetails(id);
+                var owner = await _repository.Owner.GetOwnerWithDetailsAsync(id);
 
                 if (owner.IsEmptyObject())
                 {
@@ -88,7 +87,7 @@ namespace AccountOwnerServer.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateOwner([FromBody]Owner owner)
+        public async Task<IActionResult> CreateOwner([FromBody]Owner owner)
         {
             try
             {
@@ -104,7 +103,7 @@ namespace AccountOwnerServer.Controllers
                     return BadRequest("Invalid model object");
                 }
 
-                _repository.Owner.CreateOwner(owner);
+                await _repository.Owner.CreateOwnerAsync(owner);
 
                 return CreatedAtRoute("OwnerById", new { id = owner.Id }, owner);
             }
@@ -115,8 +114,9 @@ namespace AccountOwnerServer.Controllers
             }
         }
 
+
         [HttpPut("{id}")]
-        public IActionResult UpdateOwner(Guid id, [FromBody]Owner owner)
+        public async Task<IActionResult> UpdateOwner(Guid id, [FromBody]Owner owner)
         {
             try
             {
@@ -132,14 +132,14 @@ namespace AccountOwnerServer.Controllers
                     return BadRequest("Invalid model object");
                 }
 
-                var dbOwner = _repository.Owner.GetOwnerById(id);
+                var dbOwner = await _repository.Owner.GetOwnerByIdAsync(id);
                 if (dbOwner.IsEmptyObject())
                 {
                     _logger.LogError($"Owner with id: {id}, hasn't been found in db.");
                     return NotFound();
                 }
 
-                _repository.Owner.UpdateOwner(dbOwner, owner);
+                await _repository.Owner.UpdateOwnerAsync(dbOwner, owner);
 
                 return NoContent();
             }
@@ -150,19 +150,20 @@ namespace AccountOwnerServer.Controllers
             }
         }
 
+
         [HttpDelete("{id}")]
-        public IActionResult DeleteOwner(Guid id)
+        public async Task<IActionResult> DeleteOwner(Guid id)
         {
             try
             {
-                var owner = _repository.Owner.GetOwnerById(id);
+                var owner = await _repository.Owner.GetOwnerByIdAsync(id);
                 if (owner.IsEmptyObject())
                 {
                     _logger.LogError($"Owner with id: {id}, hasn't been found in db.");
                     return NotFound();
                 }
 
-                _repository.Owner.DeleteOwner(owner);
+                await _repository.Owner.DeleteOwnerAsync(owner);
 
                 return NoContent();
             }
