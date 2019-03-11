@@ -24,7 +24,7 @@ namespace Repository
             return await this.RepositoryContext.Set<T>().ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> FindByConditionAync(Expression<Func<T, bool>> expression)
+        public async Task<IEnumerable<T>> FindByConditionAsync(Expression<Func<T, bool>> expression)
         {
             return await this.RepositoryContext.Set<T>().Where(expression).ToListAsync();
         }

@@ -26,7 +26,7 @@ namespace Repository
 
         public async Task<Owner> GetOwnerByIdAsync(Guid ownerId)
         {
-            var owner = await FindByConditionAync(o => o.Id.Equals(ownerId));
+            var owner = await FindByConditionAsync(o => o.Id.Equals(ownerId));
             return owner.DefaultIfEmpty(new Owner())
                     .FirstOrDefault();
         }

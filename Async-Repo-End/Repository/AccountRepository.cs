@@ -16,7 +16,7 @@ namespace Repository
 
         public Task<IEnumerable<Account>> AccountsByOwner(Guid ownerId)
         {
-            return FindByConditionAync(a => a.OwnerId.Equals(ownerId));
+            return FindByConditionAsync(a => a.OwnerId.Equals(ownerId));
         }
     }
 }
