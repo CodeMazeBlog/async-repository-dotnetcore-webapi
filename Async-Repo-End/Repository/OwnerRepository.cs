@@ -20,26 +20,28 @@ namespace Repository
 
         public async Task<IEnumerable<Owner>> GetAllOwnersAsync()
         {
-            var owners = await FindAllAsync();
-            return owners.OrderBy(x => x.Name);
+            return await FindAll()
+                .OrderBy(x => x.Name)
+                .ToListAsync();
         }
 
         public async Task<Owner> GetOwnerByIdAsync(Guid ownerId)
         {
-            var owner = await FindByConditionAsync(o => o.Id.Equals(ownerId));
-            return owner.DefaultIfEmpty(new Owner())
-                    .FirstOrDefault();
+            return await FindByCondition(o => o.Id.Equals(ownerId))
+                .DefaultIfEmpty(new Owner())
+                .SingleAsync();
         }
 
         public async Task<OwnerExtended> GetOwnerWithDetailsAsync(Guid ownerId)
         {
-            var owner = await GetOwnerByIdAsync(ownerId);
-
-            return new OwnerExtended(owner)
-            {
-                Accounts = await RepositoryContext.Accounts
-                    .Where(a => a.OwnerId == ownerId).ToListAsync()
-            };
+            return await FindByCondition(o => o.Id.Equals(ownerId))
+                .Select(owner => new OwnerExtended(owner)
+                {
+                    Accounts = RepositoryContext.Accounts
+                    .Where(a => a.OwnerId.Equals(owner.Id))
+                    .ToList()
+                })
+                .SingleOrDefaultAsync();
         }
 
         public async Task CreateOwnerAsync(Owner owner)

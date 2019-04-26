@@ -1,6 +1,7 @@
 ﻿using Contracts;
 using Entities;
 using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,9 +15,10 @@ namespace Repository
         {
         }
 
-        public Task<IEnumerable<Account>> AccountsByOwner(Guid ownerId)
+        public async Task<IEnumerable<Account>> AccountsByOwner(Guid ownerId)
         {
-            return FindByConditionAsync(a => a.OwnerId.Equals(ownerId));
+            return await FindByCondition(a => a.OwnerId.Equals(ownerId))
+                .ToListAsync();
         }
     }
 }
