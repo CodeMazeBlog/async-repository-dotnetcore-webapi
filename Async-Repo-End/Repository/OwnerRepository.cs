@@ -1,67 +1,54 @@
-﻿using System;
+﻿using Contracts;
+using Entities;
+using Entities.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Contracts;
-using Entities;
-using Entities.ExtendedModels;
-using Entities.Extensions;
-using Entities.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Repository
 {
-    public class OwnerRepository : RepositoryBase<Owner>, IOwnerRepository
-    {
-        public OwnerRepository(RepositoryContext repositoryContext)
-            : base(repositoryContext)
-        {
+    public class OwnerRepository : RepositoryBase<Owner>, IOwnerRepository 
+    { 
+        public OwnerRepository(RepositoryContext repositoryContext) 
+            : base(repositoryContext) 
+        { 
         }
 
-        public async Task<IEnumerable<Owner>> GetAllOwnersAsync()
-        {
-            return await FindAll()
-                .OrderBy(x => x.Name)
-                .ToListAsync();
+        public async Task<IEnumerable<Owner>> GetAllOwnersAsync() 
+        { 
+             return await FindAll()
+                .OrderBy(ow => ow.Name)
+                .ToListAsync(); 
         }
 
         public async Task<Owner> GetOwnerByIdAsync(Guid ownerId)
         {
-            return await FindByCondition(o => o.Id.Equals(ownerId))
-                .DefaultIfEmpty(new Owner())
-                .SingleAsync();
+            return await FindByCondition(owner => owner.Id.Equals(ownerId))
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<OwnerExtended> GetOwnerWithDetailsAsync(Guid ownerId)
+        public async Task<Owner> GetOwnerWithDetailsAsync(Guid ownerId)
         {
-            return await FindByCondition(o => o.Id.Equals(ownerId))
-                .Select(owner => new OwnerExtended(owner)
-                {
-                    Accounts = RepositoryContext.Accounts
-                    .Where(a => a.OwnerId.Equals(owner.Id))
-                    .ToList()
-                })
-                .SingleOrDefaultAsync();
+            return await FindByCondition(owner => owner.Id.Equals(ownerId))
+                .Include(ac => ac.Accounts)
+                .FirstOrDefaultAsync();
         }
 
-        public async Task CreateOwnerAsync(Owner owner)
+        public void CreateOwner(Owner owner)
         {
-            owner.Id = Guid.NewGuid();
             Create(owner);
-            await SaveAsync();
         }
 
-        public async Task UpdateOwnerAsync(Owner dbOwner, Owner owner)
+        public void UpdateOwner(Owner owner)
         {
-            dbOwner.Map(owner);
-            Update(dbOwner);
-            await SaveAsync();
+            Update(owner);
         }
 
-        public async Task DeleteOwnerAsync(Owner owner)
+        public void DeleteOwner(Owner owner)
         {
             Delete(owner);
-            await SaveAsync();
         }
     }
 }
